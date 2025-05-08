@@ -6,10 +6,11 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/23 22:12:28 by imutavdz          #+#    #+#             */
-/*   Updated: 2024/12/24 00:06:03 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/07 15:30:19 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
+#include "libft.h"
 
 static t_gnl	*get_node(t_gnl **head, int fd)
 {

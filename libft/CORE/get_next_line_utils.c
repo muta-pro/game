@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
-
+/*
 size_t	ft_strlen(const char *s)
 {
 	size_t	i;
@@ -62,7 +62,7 @@ char	*ft_strdup(const char *s)
 	dup[i] = '\0';
 	return (dup);
 }
-
+*/
 char	*ft_strndup(const char *s, size_t n)
 {
 	size_t	i;
