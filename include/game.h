@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 20:24:07 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/07 19:30:22 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/10 17:46:13 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 
 # define TILE_SIZE 64
 # define WINDOW_TITLE "so_long"
+# define WIDTH 256
+# define HEIGHT 256
 
 # define WALL '1'
 # define EMPTY '0'
@@ -52,50 +54,48 @@ typedef struct s_position
 
 typedef struct s_player
 {
-	t_pos	pos;
+	t_pos	pos; //curr pos
 	int		moves;
-	int		collect;
+	int		collected;
 } t_player;
 
 typedef struct s_map
 {
-	char	**grid;
+	char	**grid; //2D ARRAY
 	int		width;
 	int		height;
-	int		collect;
-	int		exits;
-	t_pos	exit_pos;
-	t_pos	player_start;
+	int		collectibles; //TOT COLLECTIBLES
+	int		exit; //NUM OF EXITS
+	int 	player; //NUM OF POSITIONS
+	t_pos	exit_pos; //EXIT POSITION
+	t_pos	player_start; //STARTING POSITION
 } t_map;
 
 typedef struct s_assets
 {
 	mlx_texture_t	*wall_texture;
-	mlx_texture_t	*empty_texture;
+	mlx_texture_t	*void_texture;
 	mlx_texture_t	*collectible_texture;
 	mlx_texture_t	*player_texture;
 	mlx_texture_t	*exit_texture;
-
 	mlx_image_t		*wall_img;
-	mlx_image_t		*empty_img;
-	mlx_image_t		*collectible_img;
+	mlx_image_t		*void_img;
+	mlx_image_t		*collect_img;
 	mlx_image_t		*player_img;
 	mlx_image_t		*exit_img;
-} t_ass;
+} t_assets;
 
 typedef struct s_game
 {
 	mlx_t		*mlx;
-	char		**map;
-	t_player	player;
-	t_ass		assets;
+	t_map		map; //map data struct
+	t_player	player; //player data
+	t_assets	assets; //game assets
 	bool		game_over;
-	int			num_collect;
-	int			move_count;
 } t_game;
 
 
-
+	
 
 
 char	**load_map(const char *file, int *width, int *height);

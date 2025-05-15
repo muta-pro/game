@@ -1,35 +1,14 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   cleanup.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/07 02:17:24 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 05:19:53 by imutavdz         ###   ########.fr       */
+/*   Created: 2025/05/09 15:58:31 by imutavdz          #+#    #+#             */
+/*   Updated: 2025/05/10 03:29:21 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
 
-char	**copy_map(t_map *map)
-{
-	char	**copy;
-	int		i;
-
-	copy = malloc(sizeof(char *) * (map->height + 1));
-	if (!copy)
-		return (NULL);
-	while (i < map->height)
-	{
-		copy[i] = ft_strdup(map->grid[i]);
-		if (!copy[i])
-		{
-			while (--i >= 0)
-				free(copy[i]);
-			free(copy);
-			return (NULL);
-		}
-	}
-	copy = NULL;
-	return (copy);
-}
+void cleanup_all()

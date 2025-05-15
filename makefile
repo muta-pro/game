@@ -5,7 +5,7 @@ INCDIR = include
 MLXDIR = MLX42/MLX42
 LIBFTDIR = ./libft
 
-SRCS = $(SRCDIR)/game.c \
+SRCS = $(SRCDIR)/game.c hooks.c loop.c path.c player.c render.c cleanup.c \
        $(SRCDIR)/map.c \
        $(SRCDIR)/map_check.c \
        $(SRCDIR)/utils.c
