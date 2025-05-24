@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 20:24:07 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 17:46:13 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 15:16:23 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,23 @@
 # include <stdio.h>
 # include "libft.h"
 
-# define TILE_SIZE 64
-# define WINDOW_TITLE "so_long"
-# define WIDTH 256
-# define HEIGHT 256
+# define TILE_SIZE 128
+# define WINDOW_TITLE "so_long" 
 
 # define WALL '1'
-# define EMPTY '0'
+# define VOID '0'
 # define COLLECTIBLE 'C'
 # define PLAYER 'P'
-# define EXITE 'E'
+# define EXIT_POINT 'E'
+# define DEATH 'D'
+# define ENEMY 'Y'
+
+# define WALL_PATH "./assets/wall.png"
+# define VOID_PATH "./assets/void.png"
+# define COLLECT_PATH "./assets/collect.png"
+# define PLAYER_PATH "./assets/player.png"
+# define EXIT_GAME "./assets/exit.png"
+// # define ENEMY_PATH "./assets/enemy.png"
 
 //error messages
 # define ERR_ARGS "Error\nIncorrect number of arguments"
@@ -45,6 +52,18 @@
 # define ERR_MAP_OPEN "Error\nCould not open map file"
 # define ERR_MEMORY "Error\nMemory allocation failed"
 # define ERR_MLX "Error\nMLX initialization failed"
+# define ERR_MAP_EMPTY "Error\nMAP file is invalid"
+# define ERR_ASSET_LOAD "Error\nFail to load game assets"
+
+typedef struct s_floodfill
+{
+	int 	width;
+	int 	height;
+	int		*exit_flag;
+	int		*collectibles;
+	int 	*enemies;
+	char	**map_copy;
+} t_path;
 
 typedef struct s_position
 {
@@ -54,9 +73,11 @@ typedef struct s_position
 
 typedef struct s_player
 {
-	t_pos	pos; //curr pos
+	t_pos	pos;
 	int		moves;
-	int		collected;
+	int		collected_count;
+	mlx_image_t right;
+	mlx_image_t left;
 } t_player;
 
 typedef struct s_map
@@ -65,48 +86,69 @@ typedef struct s_map
 	int		width;
 	int		height;
 	int		collectibles; //TOT COLLECTIBLES
-	int		exit; //NUM OF EXITS
-	int 	player; //NUM OF POSITIONS
+	int		num_exit;
+	int		player;
+	// int 	enemies;
+	// t_pos 	enemy_pos;
 	t_pos	exit_pos; //EXIT POSITION
-	t_pos	player_start; //STARTING POSITION
+	t_pos	player_pos;
 } t_map;
 
 typedef struct s_assets
 {
-	mlx_texture_t	*wall_texture;
-	mlx_texture_t	*void_texture;
-	mlx_texture_t	*collectible_texture;
-	mlx_texture_t	*player_texture;
-	mlx_texture_t	*exit_texture;
 	mlx_image_t		*wall_img;
 	mlx_image_t		*void_img;
 	mlx_image_t		*collect_img;
 	mlx_image_t		*player_img;
 	mlx_image_t		*exit_img;
+	// mlx_image_t		*enemies_img;
+	mlx_image_t		***collect_single_img;
 } t_assets;
+
+typedef struct s_ui_elements
+{
+	mlx_image_t *moves_txt_img;
+} t_ui_elem;
 
 typedef struct s_game
 {
-	mlx_t		*mlx;
-	t_map		map; //map data struct
-	t_player	player; //player data
-	t_assets	assets; //game assets
-	bool		game_over;
+	mlx_t			*mlx;
+	t_map			map; //map data struct
+	t_player		player; //player data
+	t_assets		assets; //game assets
+	t_ui_elem		ui;
+	bool			game_over;
+	mlx_instance_t	*player_insta;
 } t_game;
 
+void		final_cleanup(t_game *game);
+void		print_exit(const char *errmsg, t_game *game, bool do_cleanup);
 
-	
+bool		init_mlx_window(t_game *game);
 
+bool		load_map(t_game *game, const char *filename);
+void		free_grid(char **grid, int height);
 
-char	**load_map(const char *file, int *width, int *height);
+bool		parse_valid_map(t_game *game);
+bool		is_rect(t_map *map);
+bool		is_closed(t_map *map);
+bool		chars_valid(t_map *map);
+bool		check_counts(t_map *map);
+char		**copy_map(t_map *map);
+void		flood_fill_rec(int x, int y, t_path *data);
+bool		check_path(t_map *map);
 
-void	render_map(t_game *game);
-void	print_error(char *message);
-void	game_loop(t_game *game);
+bool 		load_graphics(t_game *game);
+mlx_image_t	*load_image(mlx_t *mlx, const char *path);
 
-char        *get_map(char *name);
-bool        is_valid(char *map);
-bool        is_playable(char **map);
-void        find_start(int *start_x, int *start_y, char **map);
+void		render_first_map(t_game *game);
+void		render_player(t_game *game);
+void		handle_player(mlx_key_data_t keydata, t_game *game);
+void		moves_display(t_game *game);
+
+void		setup_event_hooks(t_game *game);
+void		try_move(t_game *game, int dx, int dy);
+void		hide_collected(t_game *game, int coll_tile_x, int coll_tile_y);
+void		check_exit(t_game *game);
 
 #endif

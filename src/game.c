@@ -6,35 +6,22 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 20:44:41 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 04:15:45 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/17 17:42:54 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
 
-bool	load_game(t_game *game, int argc, char *argv[])
-{
-	char	*map_str;
-	t_game	game;
-	t_map	*map;
+// static void info_grid(t_map *m)
+// {
+// 	int x;
+// 	int y;
 
-	if (argc != 2)
-		print_error(ERR_ARGS);
-	map_str = get_map(argv[1]);
-	if (!map_str)
-		print_error(ERR_MAP_OPEN);
-	printf("map contents:\n%s", map_str);
-	game.map.grid = ft_split(map_str, '\n');
-	free(map_str);
-	if (!game.map.grid)
-		print_error(ERR_MEMORY);
-	game.map.height = get_height(game->map->grid);
-	game.map.width = ft_strlen(game->map->grid[0]);
-	if (!is_valid(&game.map))
-		print_error("invalid map\n");
-	init_player_position(&game);
-	game_loop(&game);
-	return (0);
-}
+// 	m->height = 0;
+// 	m->width = ft_strlen(m->grid[0]);
+// 	m->collectibles = 0;
+// 	m->exit = -0
+// }
+
 /*
 validate map
 */

@@ -1,4 +1,4 @@
-/* ************************************************************************** */
+	/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   map.c                                              :+:      :+:    :+:   */
@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 20:18:44 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 03:28:38 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/20 17:01:27 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -19,23 +19,61 @@ concatenate each line to
 or NULL
 */
 
-char	*add_line(char **map, char **line)
+static char	*read_map_lines(int fd, t_game *game)
 {
-	char	*holder;
+	char	*line;
+	char	*full_str;
+	char	*store;
 
-	if (!*map)
-		*map = ft_strdup("");
-	if (!*map || !*line)
-		return (NULL);
-	holder = ft_strjoin(*map, *line);
-	free(*map);
-	free(*line);
-	*map = NULL;
-	*line = NULL;
-	return (holder);
+	full_str = ft_strdup("");
+	if (!full_str)
+		print_exit(ERR_MEMORY, game, false);
+	line = get_next_line(fd);
+	if (!line && ft_strlen(full_str) == 0)
+	{
+		free(full_str);
+		print_exit(ERR_MAP_EMPTY, game, false);
+	}
+	while (line != NULL)
+	{
+		store = ft_strjoin(full_str, line);
+		free(full_str);
+		free(line);
+		if (!store)
+			print_exit(ERR_MEMORY, game, false);
+		full_str = store;
+		line = get_next_line(fd);
+	}
+	return (full_str);
 }
 
-char	*find_map(char *map_name)
+char	**str_to_grid(int fd, int *height, t_game *game)
+{
+	char	*found_str;
+	char	**grid;
+
+	found_str = read_map_lines(fd, game);
+	if (ft_strnstr(found_str, "\n\n", ft_strlen(found_str)))
+	{
+		free(found_str);
+		print_exit(ERR_MAP_CHARS, game, false);
+	}
+	grid = ft_split(found_str, '\n');
+	free(found_str);
+	if (!grid)
+		print_exit(ERR_MEMORY, game, false);
+	*height = 0;
+	while (grid[*height])
+		(*height)++;
+	if (*height == 0)
+	{
+		free_grid(grid, 0);
+		print_exit(ERR_MAP_EMPTY, game, false);
+	}
+	return (grid);
+}
+
+char	*find_map(const char *map_name)
 {
 	char	*dot;
 	char	*holder;
@@ -49,36 +87,34 @@ char	*find_map(char *map_name)
 	return (holder);
 }
 
-char	*get_map(char *name)
+static int	open_map(const char *name, t_game *game)
 {
 	int		fd;
-	char	*read;
-	char	*mapping;
 
-	mapping = find_map(name);
-	if (!mapping)
-	{
-		printf("error: invalid name\n");
-		return (NULL);
-	}
-	fd = open(mapping, O_RDONLY);
-	free(mapping);
-	if (fd == -1)
-	{
-		printf("error opening map\n");
-		return (NULL);
-	}
-	mapping = NULL;
-	while (true)
-	{
-		read = get_next_line(fd);
-		if (read == NULL)
-			break ;
-		mapping = add_line(&mapping, &read);
-	}
+	fd = open(name, O_RDONLY);
+	if (fd < 0)
+		print_exit(ERR_MAP_OPEN, game, false);
+	return (fd);
+}
+
+bool	load_map(t_game *game, const char *filename)
+{
+	int		fd;
+	char	*map_path;
+
+	map_path = find_map(filename);
+	if (!map_path)
+		print_exit(ERR_MAP_EXTENTION, game, false);
+	fd = open_map(map_path, game);
+	free(map_path);
+	game->map.grid = str_to_grid(fd, &game->map.height, game);
 	close(fd);
-	if (!mapping)
-		printf("error empty map\n");
-	printf("done!\n");
-	return (mapping);
+	if (!game->map.grid)
+		return (false);
+	if (!parse_valid_map(game))
+		return (false);
+	game->player.pos = game->map.player_pos;
+	game->player.moves = 0;
+	game->player.collected_count = 0;
+	return (true);
 }

@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 20:42:34 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/08 21:41:18 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/20 22:52:11 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -32,8 +32,6 @@ bool	is_closed(t_map *map)
 	int	x;
 	int	y;
 
-	while (map->grid[map->height])
-		map->height++;
 	x = 0;
 	while (x < map->width)
 	{
@@ -51,85 +49,70 @@ bool	is_closed(t_map *map)
 	return (true);
 }
 
-bool	map_elements(t_map *map)
+static bool	tile_check(t_map *map, char tile, int x, int y)
+{
+	if (tile == 'P')
+	{
+		map->player++;
+		map->player_pos.x = x;
+		map->player_pos.y = y;
+	}
+	else if (tile == 'E')
+	{
+		map->num_exit++;
+		map->exit_pos.x = x;
+		map->exit_pos.y = y;
+	}
+	else if (tile == 'C')
+		map->collectibles++;
+	else if (tile != '1' && tile != '0')
+		return (false);
+	return (true);
+}
+
+bool	valid_char(t_map *map)
 {
 	int		y;
 	int		x;
-	char	tile;
 
 	y = 0;
 	map->player = 0;
-	map->exit = 0;
+	map->num_exit = 0;
 	map->collectibles = 0;
-	while (map->grid[y])
+	while (y < map->height)
 	{
 		x = 0;
-		while (map->grid[y][x])
+		while (x < map->width)
 		{
-			tile = map->grid[y][x];
-			if (tile == 'P')
-			{
-				map->player++;
-				map->player_x = x;
-				map->player_y = y;
-			}
-			else if (tile == 'E')
-			{
-				map->exit++;
-				map->exit_x = x;
-				map->exit_y = y;
-			}
-			else if (tile == 'C')
-				map->collectibles++;
-			else if (tile != '1' && tile != '0')
+			if (!tile_check(map, map->grid[y][x], x, y))
 				return (false);
 			x++;
 		}
 		y++;
 	}
-	return (map->player == 1 && map->exit == 1 && map->collectibles >= 1);
-}
-
-bool	flood_fill_valid_path(char **map, int x, int y)
-{
-	
-}
-
-bool	is_valid(t_map *map)
-{
-	if (!is_rect(map))
-		return (false);
-	if (!is_closed(map))
-		return (false);
-	if (!map_elements(map))
-		return (false);
-	if (map->player != 1 || map->collectibles < 1 || map->exit != 1)
-		return (false);
-	if (!check_path(map))
-		return (false);
 	return (true);
 }
 
-int	check_path(t_map *map)
+bool	parse_valid_map(t_game *game)
 {
-	char	**store_map;
-	int		collectibles;
-	int		exit;
-	int		i;
-
-	i = 0;
-	store_map = copy_map(map);
-	if (!store_map)
-		return (0);
-	collectibles = map->collectibles;
-	exit = 0;
-	flood_fill_valid_path(store_map, map->player_x, map->player_y,
-		&collectibles, &exit);
-	while (i < map->height)
-	{
-		free(store_map[i]);
-		free(store_map);
-		i++;
-	}
-	return (collectibles == 0 && exit == 1);
+	if (!game->map.grid[0] || game->map.height <= 0)
+		print_exit(ERR_MAP_EMPTY, game, true);
+	game->map.width = ft_strlen(game->map.grid[0]);
+	if (game->map.width == 0)
+		print_exit(ERR_MAP_EMPTY, game, true);
+	if (!is_rect(&game->map))
+		print_exit(ERR_MAP_RECT, game, true);
+	if (!is_closed(&game->map))
+		print_exit(ERR_MAP_WALLS, game, true);
+	if (!valid_char(&game->map))
+		print_exit(ERR_MAP_CHARS, game, true);
+	if (game->map.player != 1)
+		print_exit(ERR_MAP_PLAYER, game, true);
+	if (game->map.num_exit < 1)
+		print_exit(ERR_MAP_EXIT, game, true);
+	if (game->map.collectibles < 1)
+		print_exit(ERR_MAP_COLLECT, game, true);
+	if (!check_path(&game->map))
+		print_exit("Error, path invalid", game, true);
+	return (true);
 }

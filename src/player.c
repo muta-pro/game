@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 22:23:14 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 23:22:02 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 14:44:44 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -15,8 +15,9 @@ void	try_move(t_game *game, int dx, int dy)
 {
 	int			target_x;
 	int			target_y;
-	uint32_t	i;
 
+	if (game->game_over)
+		return ;
 	target_x = game->player.pos.x + dx;
 	target_y = game->player.pos.y + dy;
 	if (target_x < 0 || target_x >= game->map.width
@@ -25,23 +26,32 @@ void	try_move(t_game *game, int dx, int dy)
 	if (game->map.grid[target_y][target_x] == WALL)
 		return ;
 	game->player.moves++;
-	ft_printf("Moves: %d\n", game->player.moves);
-	moves_show(game);
+	moves_display(game);
 	game->player.pos.x = target_x;
 	game->player.pos.y = target_y;
-	game->assets.player_img->instances[0].x = target_x * TILE_SIZE;
-	game->assets.player_img->instances[0].y = target_y * TILE_SIZE;
-	game->assets.player_img->instances[0].z = 10;
+	if (game->player_insta)
+	{
+		game->player_insta->x = target_x * TILE_SIZE;
+		game->player_insta->y = target_y * TILE_SIZE;
+		game->player_insta->z = 10;
+	}
 	if (game->map.grid[target_y][target_x] == COLLECTIBLE)
 	{
-		game->player.collected++;
+		game->player.collected_count++;
 		game->map.grid[target_y][target_x] = VOID;
+		hide_collected(game, target_x, target_y);
 	}
-	while (i < game->assets.collect_img->count)
+	if (game->map.grid[target_y][target_x] == EXIT_POINT)
 	{
-		if (game->assets.collect_img->instances[i].enabled) &&
-			game->assets.collect_img->instances[i].x == target_x * TILE_SIZE
-		&&
+		if (game->player.collected_count == game->map.collectibles)
+		{
+			game->game_over = true;
+			mlx_close_window(game->mlx);
+		}
+		else
+		{
+			ft_printf("BRO, you can't be saved yet! Collect all the TWIX!\n");
+		}
 	}
 }
 

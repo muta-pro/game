@@ -6,81 +6,95 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 15:25:20 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/10 16:38:29 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 14:45:22 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
 
-void	render_first_layer(t_game *game)
+static void	put_tile(t_game *game, char tile, int x_pxl, int y_pxl)
 {
-	int	x_map;
-	int	y_map;
-	int	x_pxl;
-	int	y_pxl;
+	mlx_image_t	*put_img;
 
-	y_map = 0;
-	while (y_map < game->map.height)
+	put_img = NULL;
+	if (tile == WALL)
+		put_img = game->assets.wall_img;
+	else if (tile == COLLECTIBLE)
+		put_img = game->assets.collect_img;
+	else if (tile == EXIT_POINT)
+		put_img = game->assets.exit_img;
+	if (put_img)
 	{
-		x_map = 0;
-		while (x_map < game->map.width)
-		{
-			x_pxl = x_map * TILE_SIZE;
-			y_pxl = x_map * TILE_SIZE;
-			if (game->assets.void_img)
-			{
-				if (mlx_image_to_window(game->mlx, game->assets.void_img,
-						x_pxl, y_pxl) < 0)
-					print_error("failed to draw empty tile image.", game);
-			}
-			if (game->map.grid[y_map][x_map] == WALL)
-			{
-				if (mlx_image_to_window(game->mlx, game->assets.wall_img,
-						x_pxl, y_pxl) < 0)
-					print_error("failed to draw wall image", game);
-			}
-			else if (game->map.grid[y_map][x_map] == COLLECTIBLE)
-			{
-				if (mlx_image_to_window(game->mlx, game->assets.collect_img,
-						x_pxl, y_pxl) < 0)
-					print_error("failed to draw collectible image", game);
-			} //STORE THR INSTANCE ID OR POINTER TO SPEC COLLECTIBLE IMG, to hide easier later
-			else if (game->map.grid[y_map][x_map] == EXXIT)
-			{
-				if (mlx_image_to_window(game->mlx, game->assets.exit_img,
-						x_pxl, y_pxl) < 0)
-					print_error("failed to draw exit image", game);
-			}
-			++x;
-		}
-		++y;
+		if (mlx_image_to_window(game->mlx, put_img, x_pxl, y_pxl) < 0)
+			print_exit(ERR_ASSET_LOAD, game, true);
+		// if (tile == EXIT_POINT && put_img->count > 0)
+		// 	put_img->instances[put_img->count - 1].enabled = false;
 	}
-	if (game.assets.player_img)
+}
+
+void	render_first_map(t_game *game)
+{
+	int		x_map_idx;
+	int		y_map_idx;
+	int		x_pxl;
+	int		y_pxl;
+	char	tile;
+
+	y_map_idx = 0;
+	while (y_map_idx < game->map.height)
+	{
+		x_map_idx = 0;
+		while (x_map_idx < game->map.width)
+		{
+			x_pxl = x_map_idx * TILE_SIZE;
+			y_pxl = y_map_idx * TILE_SIZE;
+			if (!game->assets.void_img
+				|| mlx_image_to_window(game->mlx,
+					game->assets.void_img, x_pxl, y_pxl) < 0)
+				print_exit("failed to draw empty tile image.", game, true);
+			tile = game->map.grid[y_map_idx][x_map_idx];
+			put_tile(game, tile, x_pxl, y_pxl);
+			++x_map_idx;
+		}
+		++y_map_idx;
+	}
+}
+
+void	render_player(t_game *game)
+{
+	if (game->assets.player_img)
 	{
 		if (mlx_image_to_window(game->mlx, game->assets.player_img,
-				game->player_x * TILE_SIZE, game->player_y * TILE_SIZE) < 0)
-			print_error("failed to draw player image", game);
-			//STORE PLAYER INSTANCE SO I CAN  MOVE DIRECTLY
-			// game->player.image_instance = &game->assets.player_img
-			// ->instances[game->assets.player_img->count - 1];
-			//or
-			// game->assets.player_img->instances[0].enabled = true;
-			// game->assets.player_img->instances[0].z = 10; //player on top
+				game->player.pos.x * TILE_SIZE,
+				game->player.pos.y * TILE_SIZE) < 0)
+			print_exit("fail to render player_img", game, true);
+		if (game->assets.player_img->count > 0)
+			game->player_insta = &game->assets.player_img->instances[0];
 	}
+	else
+		print_exit("player_img is NULL, cannot render", game, true);
+}
+			// STORE PLAYER INSTANCE SO I CAN  MOVE DIRECTLY
+
+void	moves_display(t_game *game)
+{
 	char	*moves_str;
 	char	*full_str;
 
+	if (game->ui.moves_txt_img != NULL)
+	{
+		mlx_delete_image(game->mlx, game->ui.moves_txt_img);
+		game->ui.moves_txt_img = NULL;
+	}
 	moves_str = ft_itoa(game->player.moves);
 	if (!moves_str)
-		print_error(ERR_MEMORY, game);
+		print_exit(ERR_MEMORY, game, true);
 	full_str = ft_strjoin("MOVES -> ", moves_str);
-	if (!full_str)
-	{
-		free(moves_str);
-		print_error(ERR_MEMORY, game);
-	}
-	game->ui.moves_text_img = mlx_put_string(game->mlx, full_str, 5, 5);
-	if (!game->ui.moves_text_img)
-		ft_putstr_fd("could not display move count text\n", STDERR_FILENO);
 	free(moves_str);
+	if (!full_str)
+		print_exit(ERR_MEMORY, game, true);
+	game->ui.moves_txt_img = mlx_put_string(game->mlx, full_str, 3, 5);
 	free(full_str);
+	if (!game->ui.moves_txt_img)
+		ft_putstr_fd("could not display move count text\n", STDERR_FILENO);
+	ft_printf("Moves: %d\n", game->player.moves);
 }

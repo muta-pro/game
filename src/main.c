@@ -6,35 +6,47 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 14:54:57 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/11 13:27:47 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 14:16:55 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
 
-bool	load_game(t_game *game, int argc, char *argv[])
+void	print_grid_test(t_map *map);
+
+static void	init_g_struct(t_game *game)
 {
-	if (argc != 2)
-	{
-		print_error();
-	}
+	ft_bzero(game, sizeof(t_game));
+	game->game_over = false;
 }
 
 int	main(int argc, char *argv[])
 {
 	t_game	game;
 
-	init_struct(&game); //struct initialized
 	if (argc != 2)
-		print_exit(ERR_ARGS, &game); //partial cleanup
-	if (!ber_file(argv[1], ".ber"))
-		print_exit(ERR_MAP_EXTENTION, &game);
-	load_map(argv[1], &game.map, &game);
-	if (!open_window(&game))
-		print_exit(ERR_MLX, &game);
-	load_player(&game);
-	load_graphics(&game);
-	event_handler_setup(&game);
-	mlx_main(game.mlx);
+		print_exit(ERR_ARGS, NULL, false);
+	init_g_struct(&game);
+	if (!load_map(&game, argv[1]))
+		return (EXIT_FAILURE);
+	print_grid_test(&game.map);
+	if (!init_mlx_window(&game))
+		print_exit(ERR_MLX, &game, true);
+	if (!load_graphics(&game))
+		print_exit(ERR_ASSET_LOAD, &game, true);
+	render_first_map(&game);
+	render_player(&game);
+	moves_display(&game);
+	setup_event_hooks(&game);
+	mlx_loop(game.mlx);
 	final_cleanup(&game);
 	return (EXIT_SUCCESS);
 }
+
+// void event_handler_setup(t_game *game)
+// {
+// 	mlx_loop_hook(game->mlx, ft_hook, mlx);//for move counter
+// 	mlx_key_hook(mlx, mlx_close_esc(), par);
+// 	mlx_close_hook(mlx, mlx_close_x(), par);
+// 	mlx_delete_image(mlx, image);
+// 	mlx_terminate(mlx);
+// }
