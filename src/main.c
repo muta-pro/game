@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 14:54:57 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 14:16:55 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 23:49:05 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -35,7 +35,7 @@ int	main(int argc, char *argv[])
 		print_exit(ERR_ASSET_LOAD, &game, true);
 	render_first_map(&game);
 	render_player(&game);
-	moves_display(&game);
+	// moves_display(&game);
 	setup_event_hooks(&game);
 	mlx_loop(game.mlx);
 	final_cleanup(&game);

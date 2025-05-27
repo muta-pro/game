@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/05 20:24:07 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 15:16:23 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/25 00:24:57 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 # include "libft.h"
 
 # define TILE_SIZE 128
-# define WINDOW_TITLE "so_long" 
+# define WINDOW_TITLE "SO_TWIX" 
 
 # define WALL '1'
 # define VOID '0'
@@ -35,7 +35,8 @@
 # define WALL_PATH "./assets/wall.png"
 # define VOID_PATH "./assets/void.png"
 # define COLLECT_PATH "./assets/collect.png"
-# define PLAYER_PATH "./assets/player.png"
+# define PLAYER_PATH_R "./assets/player.png"
+# define PLAYER_PATH_L "./assets/player_left.pngs"
 # define EXIT_GAME "./assets/exit.png"
 // # define ENEMY_PATH "./assets/enemy.png"
 
@@ -57,28 +58,28 @@
 
 typedef struct s_floodfill
 {
-	int 	width;
-	int 	height;
+	int		width;
+	int		height;
 	int		*exit_flag;
 	int		*collectibles;
-	int 	*enemies;
+	int		*enemies;
 	char	**map_copy;
-} t_path;
+}	t_path;
 
 typedef struct s_position
 {
-	int x;
-	int y;
-} t_pos;
+	int	x;
+	int	y;
+}	t_pos;
 
 typedef struct s_player
 {
-	t_pos	pos;
-	int		moves;
-	int		collected_count;
-	mlx_image_t right;
-	mlx_image_t left;
-} t_player;
+	t_pos		pos;
+	int			moves;
+	int			collected_count;
+	mlx_image_t	*curr_plsyrt_img;
+	mlx_image_t	*player_insta;
+}	t_player;
 
 typedef struct s_map
 {
@@ -92,7 +93,7 @@ typedef struct s_map
 	// t_pos 	enemy_pos;
 	t_pos	exit_pos; //EXIT POSITION
 	t_pos	player_pos;
-} t_map;
+}	t_map;
 
 typedef struct s_assets
 {
@@ -100,15 +101,16 @@ typedef struct s_assets
 	mlx_image_t		*void_img;
 	mlx_image_t		*collect_img;
 	mlx_image_t		*player_img;
+	mlx_image_t		*player_img_l;
 	mlx_image_t		*exit_img;
 	// mlx_image_t		*enemies_img;
 	mlx_image_t		***collect_single_img;
-} t_assets;
+}	t_assets;
 
 typedef struct s_ui_elements
 {
-	mlx_image_t *moves_txt_img;
-} t_ui_elem;
+	mlx_image_t	*moves_txt_img;
+}	t_ui_elem;
 
 typedef struct s_game
 {
@@ -119,7 +121,7 @@ typedef struct s_game
 	t_ui_elem		ui;
 	bool			game_over;
 	mlx_instance_t	*player_insta;
-} t_game;
+}	t_game;
 
 void		final_cleanup(t_game *game);
 void		print_exit(const char *errmsg, t_game *game, bool do_cleanup);
@@ -138,7 +140,7 @@ char		**copy_map(t_map *map);
 void		flood_fill_rec(int x, int y, t_path *data);
 bool		check_path(t_map *map);
 
-bool 		load_graphics(t_game *game);
+bool		load_graphics(t_game *game);
 mlx_image_t	*load_image(mlx_t *mlx, const char *path);
 
 void		render_first_map(t_game *game);

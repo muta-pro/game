@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 15:25:20 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 14:45:22 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/26 00:22:47 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -26,6 +26,8 @@ static void	put_tile(t_game *game, char tile, int x_pxl, int y_pxl)
 	{
 		if (mlx_image_to_window(game->mlx, put_img, x_pxl, y_pxl) < 0)
 			print_exit(ERR_ASSET_LOAD, game, true);
+		else if (tile == EXIT_POINT && put_img->count > 0)
+			put_img->instances[put_img->count - 1].z = 1;
 		// if (tile == EXIT_POINT && put_img->count > 0)
 		// 	put_img->instances[put_img->count - 1].enabled = false;
 	}
@@ -37,7 +39,6 @@ void	render_first_map(t_game *game)
 	int		y_map_idx;
 	int		x_pxl;
 	int		y_pxl;
-	char	tile;
 
 	y_map_idx = 0;
 	while (y_map_idx < game->map.height)
@@ -51,8 +52,10 @@ void	render_first_map(t_game *game)
 				|| mlx_image_to_window(game->mlx,
 					game->assets.void_img, x_pxl, y_pxl) < 0)
 				print_exit("failed to draw empty tile image.", game, true);
-			tile = game->map.grid[y_map_idx][x_map_idx];
-			put_tile(game, tile, x_pxl, y_pxl);
+			if (game->assets.void_img->count > 0)
+				game->assets.void_img
+					->instances[game->assets.void_img->count - 1].z = 0;
+			put_tile(game, game->map.grid[y_map_idx][x_map_idx], x_pxl, y_pxl);
 			++x_map_idx;
 		}
 		++y_map_idx;
@@ -68,7 +71,10 @@ void	render_player(t_game *game)
 				game->player.pos.y * TILE_SIZE) < 0)
 			print_exit("fail to render player_img", game, true);
 		if (game->assets.player_img->count > 0)
+		{
 			game->player_insta = &game->assets.player_img->instances[0];
+			mlx_set_instance_depth(game->player_insta, 10);
+		}
 	}
 	else
 		print_exit("player_img is NULL, cannot render", game, true);

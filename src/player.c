@@ -6,10 +6,34 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 22:23:14 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 14:44:44 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/24 23:51:35 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
+
+static void	exit_game(t_game *game, int y_tile, int x_tile)
+{
+	if (game->map.grid[y_tile][x_tile] == EXIT_POINT)
+	{
+		if (game->player.collected_count == game->map.collectibles)
+		{
+			game->game_over = true;
+			mlx_close_window(game->mlx);
+		}
+		else
+			ft_printf("BRO, you can't be saved yet! Collect all the TWIX!\n");
+	}
+}
+
+static void	when_collected(t_game *game, int y_tile, int x_tile)
+{
+	if (game->map.grid[y_tile][x_tile] == COLLECTIBLE)
+	{
+		game->player.collected_count++;
+		game->map.grid[y_tile][x_tile] = VOID;
+		hide_collected(game, x_tile, y_tile);
+	}
+}
 
 void	try_move(t_game *game, int dx, int dy)
 {
@@ -33,26 +57,11 @@ void	try_move(t_game *game, int dx, int dy)
 	{
 		game->player_insta->x = target_x * TILE_SIZE;
 		game->player_insta->y = target_y * TILE_SIZE;
-		game->player_insta->z = 10;
 	}
-	if (game->map.grid[target_y][target_x] == COLLECTIBLE)
-	{
-		game->player.collected_count++;
-		game->map.grid[target_y][target_x] = VOID;
-		hide_collected(game, target_x, target_y);
-	}
-	if (game->map.grid[target_y][target_x] == EXIT_POINT)
-	{
-		if (game->player.collected_count == game->map.collectibles)
-		{
-			game->game_over = true;
-			mlx_close_window(game->mlx);
-		}
-		else
-		{
-			ft_printf("BRO, you can't be saved yet! Collect all the TWIX!\n");
-		}
-	}
+	else
+		ft_printf("Warning/Error: game->player_insta is NULL in try_move!\n");
+	when_collected(game, target_y, target_x);
+	exit_game(game, target_y, target_x);
 }
 
 void	handle_player(mlx_key_data_t keydata, t_game *game)

@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 15:58:31 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 14:33:42 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/25 23:42:36 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -38,7 +38,7 @@ void	print_exit(const char *errmsg, t_game *game, bool do_cleanup)
 {
 	if (errmsg)
 	{
-		ft_putstr_fd("Error\n", STDERR_FILENO);
+		// ft_putstr_fd("Error\n", STDERR_FILENO);
 		ft_putstr_fd((char *)errmsg, STDERR_FILENO);
 		ft_putstr_fd("\n", STDERR_FILENO);
 	}

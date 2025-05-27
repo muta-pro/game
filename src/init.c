@@ -6,7 +6,7 @@
 /*   By: imutavdz <imutavdz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 02:34:44 by imutavdz          #+#    #+#             */
-/*   Updated: 2025/05/24 11:57:30 by imutavdz         ###   ########.fr       */
+/*   Updated: 2025/05/25 00:30:29 by imutavdz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "game.h"
@@ -71,6 +71,8 @@ bool	load_graphics(t_game *game)
 	game->assets.player_img = load_image(game->mlx, "./assets/player.png");
 	if (!game->assets.player_img)
 		print_exit(ERR_ASSET_LOAD, game, true);
+	// if (!game->assets.player_img_l)
+	// 	print_exit(ERR_ASSET_LOAD, game, true);
 	game->assets.exit_img = load_image(game->mlx, "./assets/exit.png");
 	if (!game->assets.exit_img)
 		print_exit(ERR_ASSET_LOAD, game, true);
